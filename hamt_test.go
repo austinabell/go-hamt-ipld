@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -13,6 +14,7 @@ import (
 	block "github.com/ipfs/go-block-format"
 	cid "github.com/ipfs/go-cid"
 	cbor "github.com/ipfs/go-ipld-cbor"
+	"github.com/stretchr/testify/require"
 )
 
 type mockBlocks struct {
@@ -74,8 +76,9 @@ func TestCanonicalStructure(t *testing.T) {
 	defer func() {
 		hash = murmurHash
 	}()
-	addAndRemoveKeys(t, defaultBitWidth, []string{"K"}, []string{"B"})
-	addAndRemoveKeys(t, defaultBitWidth, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"})
+	addAndRemoveKeys(t, defaultBitWidth, []string{"K"}, []string{"B"}, "0171a0e402208683c5cd09bc6c1df93d100bee677d7a6bbe8db0b340361866e3fb20fb0a981e")
+
+	addAndRemoveKeys(t, defaultBitWidth, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "0171a0e40220e2a9e53c77d146010b60f2be9b3ba423c0db4efea06e66bd87e072671c8ef411")
 }
 
 func TestCanonicalStructureAlternateBitWidth(t *testing.T) {
@@ -83,12 +86,12 @@ func TestCanonicalStructureAlternateBitWidth(t *testing.T) {
 	defer func() {
 		hash = murmurHash
 	}()
-	addAndRemoveKeys(t, 7, []string{"K"}, []string{"B"})
-	addAndRemoveKeys(t, 7, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"})
-	addAndRemoveKeys(t, 6, []string{"K"}, []string{"B"})
-	addAndRemoveKeys(t, 6, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"})
-	addAndRemoveKeys(t, 5, []string{"K"}, []string{"B"})
-	addAndRemoveKeys(t, 5, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"})
+	addAndRemoveKeys(t, 7, []string{"K"}, []string{"B"}, "0171a0e40220c4ac32c9bb0dbec96b290d68b1b1fc6e1ddfe33f99420b4b46a078255d997db8")
+	addAndRemoveKeys(t, 7, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "0171a0e4022094833c20da84ad6e18a603a47aa143e3393171d45786eddc5b182ae647dafd64")
+	addAndRemoveKeys(t, 6, []string{"K"}, []string{"B"}, "0171a0e40220b45f48552b1b802fafcb79b417c4d2972ea42cd24600eaf9a0d1314c7d46c214")
+	addAndRemoveKeys(t, 6, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "0171a0e40220c84814bb7fdbb71a17ac24b0eb110a38e4e79c93fccaa6d87fa9e5aa771bb453")
+	addAndRemoveKeys(t, 5, []string{"K"}, []string{"B"}, "0171a0e402209a00d457b7d5d398a225fa837125db401a5eabdf4833352aed48dd28dc6eca56")
+	addAndRemoveKeys(t, 5, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "0171a0e40220c5f39f53c67de67dbf8a058b699fb1e4673d78a5f6a0dc59583f9a175db234e3")
 }
 func TestOverflow(t *testing.T) {
 	hash = identityHash
@@ -125,12 +128,12 @@ func TestOverflow(t *testing.T) {
 	}
 }
 
-func addAndRemoveKeys(t *testing.T, bitWidth int, keys []string, extraKeys []string) {
+func addAndRemoveKeys(t *testing.T, bitWidth int, keys []string, extraKeys []string, expected string) {
 	ctx := context.Background()
-	vals := make(map[string][]byte)
+	vals := make(map[string]int)
 	for i := 0; i < len(keys); i++ {
 		s := keys[i]
-		vals[s] = randValue()
+		vals[s] = i
 	}
 
 	cs := cbor.NewCborStore(newMockBlocks())
@@ -159,19 +162,19 @@ func addAndRemoveKeys(t *testing.T, bitWidth int, keys []string, extraKeys []str
 	n.store = cs
 	n.bitWidth = bitWidth
 	for k, v := range vals {
-		var out []byte
+		var out int
 		err := n.Find(ctx, k, &out)
 		if err != nil {
 			t.Fatalf("should have found the thing (err: %s)", err)
 		}
-		if !bytes.Equal(out, v) {
+		if out != v {
 			t.Fatalf("got wrong value after value change: %x != %x", out, v)
 		}
 	}
 
 	// create second hamt by adding and deleting the extra keys
 	for i := 0; i < len(extraKeys); i++ {
-		begn.Set(ctx, extraKeys[i], randValue())
+		begn.Set(ctx, extraKeys[i], i)
 	}
 	for i := 0; i < len(extraKeys); i++ {
 		if err := begn.Delete(ctx, extraKeys[i]); err != nil {
@@ -196,6 +199,8 @@ func addAndRemoveKeys(t *testing.T, bitWidth int, keys []string, extraKeys []str
 	if !nodesEqual(t, cs, &n, &n2) {
 		t.Fatal("nodes should be equal")
 	}
+
+	require.Equal(t, expected, hex.EncodeToString(c2.Bytes()))
 }
 
 func dotGraphRec(n *Node, name *int) {
@@ -299,17 +304,16 @@ func TestBasic(t *testing.T) {
 func TestDelete(t *testing.T) {
 	ctx := context.Background()
 	cs := cbor.NewCborStore(newMockBlocks())
-	begn := NewNode(cs)
+	begn := NewNode(cs, UseTreeBitWidth(5))
 
-	val := []byte("cat dog bear")
-	if err := begn.Set(ctx, "foo", val); err != nil {
+	if err := begn.Set(ctx, "foo", []byte("cat dog bear")); err != nil {
 		t.Fatal(err)
 	}
-
-	for i := 0; i < 10; i++ {
-		if err := begn.Set(ctx, randString(), randValue()); err != nil {
-			t.Fatal(err)
-		}
+	if err := begn.Set(ctx, "bar", []byte("cat dog")); err != nil {
+		t.Fatal(err)
+	}
+	if err := begn.Set(ctx, "baz", []byte("cat")); err != nil {
+		t.Fatal(err)
 	}
 
 	if err := begn.Flush(ctx); err != nil {
@@ -319,6 +323,8 @@ func TestDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	require.Equal(t, "0171a0e402204c4cec750f4e5fc0df61e5a6b6f430d45e6d42108824492658ccd480a4f86aef", hex.EncodeToString(c.Bytes()))
 
 	n, err := LoadNode(ctx, cs, c)
 	if err != nil {
@@ -333,13 +339,75 @@ func TestDelete(t *testing.T) {
 	if err := n.Find(ctx, "foo", &out); err == nil {
 		t.Fatal("shouldnt have found object")
 	}
+
+	if err := n.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c, err = cs.Put(ctx, n)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	require.Equal(t, "0171a0e40220f8889d65614928ee8fd0a1fc27fb94357751ce95e99260b16b8789455eb7d212", hex.EncodeToString(c.Bytes()))
+}
+
+func TestSerDeleteMany(t *testing.T) {
+	ctx := context.Background()
+	cs := cbor.NewCborStore(newMockBlocks())
+
+	n := NewNode(cs, UseTreeBitWidth(5))
+
+	for i := 0; i < 200; i++ {
+		if err := n.Set(ctx, strconv.Itoa(i), i); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := n.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c, err := cs.Put(ctx, n)
+	if err != nil {
+		t.Fatal(err)
+	}
+	require.Equal(t, "0171a0e402207c660382de99c174ce39517bdbd28f3967801aebbd9795f0591e226d93e2f010", hex.EncodeToString(c.Bytes()))
+
+	for i := 200; i < 400; i++ {
+		if err := n.Set(ctx, strconv.Itoa(i), i); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := n.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c, err = cs.Put(ctx, n)
+	if err != nil {
+		t.Fatal(err)
+	}
+	require.Equal(t, "0171a0e40220dba161623db24093bd90e00c3d185bae8468f8d3e81f01f112b3afe47e603fd1", hex.EncodeToString(c.Bytes()))
+
+	for i := 200; i < 400; i++ {
+		if err := n.Delete(ctx, strconv.Itoa(i)); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := n.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c, err = cs.Put(ctx, n)
+	if err != nil {
+		t.Fatal(err)
+	}
+	require.Equal(t, "0171a0e402207c660382de99c174ce39517bdbd28f3967801aebbd9795f0591e226d93e2f010", hex.EncodeToString(c.Bytes()))
 }
 
 func TestSetGet(t *testing.T) {
 	ctx := context.Background()
 	vals := make(map[string][]byte)
 	var keys []string
-	for i := 0; i < 100000; i++ {
+	for i := 0; i < 200; i++ {
 		s := randString()
 		vals[s] = randValue()
 		keys = append(keys, s)
