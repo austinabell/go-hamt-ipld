@@ -16,7 +16,6 @@ import (
 	block "github.com/ipfs/go-block-format"
 	cid "github.com/ipfs/go-cid"
 	cbor "github.com/ipfs/go-ipld-cbor"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	cbg "github.com/whyrusleeping/cbor-gen"
 )
@@ -43,6 +42,7 @@ func (mb *mockBlocks) Get(c cid.Cid) (block.Block, error) {
 func (mb *mockBlocks) Put(b block.Block) error {
 	mb.stats.w++
 	mb.stats.bw += len(b.RawData())
+	fmt.Println("Put", hex.EncodeToString(b.RawData()))
 	// if _, exists := mb.data[b.Cid()]; exists {
 	// 	mb.stats.evtcntPutDup++
 	// }
@@ -154,7 +154,7 @@ var shortIdentityHash = func(k []byte) []byte {
 }
 
 func TestCanonicalStructure(t *testing.T) {
-	// addAndRemoveKeys(t, []string{"K"}, []string{"B"}, "bafy2bzacecdihronbg6gyhpzhuiax3thpv5gxpunwczuanqym3r7wih3bkmb4", bsStats{r: 2, w: 4, br: 42, bw: 84}, UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, "bafy2bzacecosy45hp4sz2t4o4flxvntnwjy7yaq43bykci22xycpeuj542lse", bsStats{r: 2, w: 4, br: 38, bw: 76}, UseHashFunction(identityHash))
 	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "bafy2bzaceaqdaj5aqkwugr7wx4to3fahynoqlxuo5j6xznly3khazgyxihkbo", bsStats{r: 3, w: 6, br: 163, bw: 326}, UseHashFunction(identityHash))
 }
 
@@ -179,7 +179,7 @@ func TestOverflow(t *testing.T) {
 
 	for _, k := range keys[:3] {
 		err := n.Set(context.Background(), k, cborstr("foobar"))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 
 	// Try forcing the depth beyond 32
@@ -189,7 +189,7 @@ func TestOverflow(t *testing.T) {
 
 	// Force _to_ max depth.
 	err = n.Set(context.Background(), keys[3][1:], cborstr("bad"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Now, try fetching with a shorter hash function.
 	n.hash = shortIdentityHash
@@ -202,7 +202,7 @@ func TestFillAndCollapse(t *testing.T) {
 	ctx := context.Background()
 	cs := cbor.NewCborStore(newMockBlocks())
 	root, err := NewNode(cs, UseTreeBitWidth(8), UseHashFunction(identityHash))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	val := randValue()
 
 	// start with a single node and a single full bucket
@@ -430,8 +430,8 @@ func addAndRemoveKeys(t *testing.T, keys []string, extraKeys []string, cid strin
 		t.Fatal("nodes should be equal")
 	}
 
-	assert.Equal(t, cid, c2.String())
-	assert.Equal(t, stats, trackingBs.stats)
+	require.Equal(t, cid, c2.String())
+	require.Equal(t, stats, trackingBs.stats)
 }
 
 func printHamt(hamt *Node) {
@@ -654,25 +654,44 @@ func TestDelete(t *testing.T) {
 	begn, err := NewNode(cs)
 	require.NoError(t, err)
 
-	val := cborstr("cat dog bear")
-	err = begn.Set(ctx, "foo", val)
+	err = begn.Set(ctx, "foo", cborstr("cat dog bear"))
+	err = begn.Set(ctx, "bar", cborstr("cat dog"))
+	err = begn.Set(ctx, "baz", cborstr("cat"))
 	require.NoError(t, err)
-
-	for i := 0; i < 10; i++ {
-		err := begn.Set(ctx, randKey(), randValue())
-		require.NoError(t, err)
-	}
 
 	if err := begn.Flush(ctx); err != nil {
 		t.Fatal(err)
 	}
-	c2, err := cs.Put(ctx, begn)
+	c, err := cs.Put(ctx, begn)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, "bafy2bzacecnvmfb5czmbuv327imlcgrbj6wzqi7rfwdla6r5kwkmildsbanzq", c2.String())
-	assert.Equal(t, bsStats{r: 0, w: 1, br: 0, bw: 775}, trackingBs.stats)
+	require.Equal(t, "bafy2bzacebql36crv4odvxzstx2ubaczmawy2tlljxezvorcsoqeyyojxkrom", c.String())
+
+	n, err := LoadNode(ctx, cs, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	found, err := n.Delete(ctx, "foo")
+	require.NoError(t, err)
+	require.True(t, found)
+
+	var out CborByteArray
+	found, err = n.Find(ctx, "foo", &out)
+	require.False(t, found)
+
+	if err := n.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c2, err := cs.Put(ctx, n)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	require.Equal(t, "bafy2bzaced7up7wkm7cirieh5bs4iyula5inrprihmjzozmku3ywvekzzmlyi", c2.String())
+	require.Equal(t, bsStats{r: 1, w: 2, br: 79, bw: 139}, trackingBs.stats)
 }
 func TestDeleteCase(t *testing.T) {
 	ctx := context.Background()
@@ -693,7 +712,7 @@ func TestDeleteCase(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, "bafy2bzaceb2hikcc6tfuuuuehjstbiq356oruwx6ejyse77zupq445unranv6", c.String())
+	require.Equal(t, "bafy2bzaceb2hikcc6tfuuuuehjstbiq356oruwx6ejyse77zupq445unranv6", c.String())
 
 	n, err := LoadNode(ctx, cs, c)
 	if err != nil {
@@ -716,8 +735,8 @@ func TestDeleteCase(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, "bafy2bzaceamp42wmmgr2g2ymg46euououzfyck7szknvfacqscohrvaikwfay", c2.String())
-	assert.Equal(t, bsStats{r: 1, w: 2, br: 31, bw: 34}, trackingBs.stats)
+	require.Equal(t, "bafy2bzaceamp42wmmgr2g2ymg46euououzfyck7szknvfacqscohrvaikwfay", c2.String())
+	require.Equal(t, bsStats{r: 1, w: 2, br: 31, bw: 34}, trackingBs.stats)
 }
 
 func TestSetDeleteMany(t *testing.T) {
@@ -740,7 +759,7 @@ func TestSetDeleteMany(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, "bafy2bzaceczhz54xmmz3xqnbmvxfbaty3qprr6dq7xh5vzwqbirlsnbd36z7a", c.String())
+	require.Equal(t, "bafy2bzaceczhz54xmmz3xqnbmvxfbaty3qprr6dq7xh5vzwqbirlsnbd36z7a", c.String())
 
 	for i := 200; i < 400; i++ {
 		if err := n.Set(ctx, strconv.Itoa(i), cborstr(strconv.Itoa(i))); err != nil {
@@ -755,7 +774,7 @@ func TestSetDeleteMany(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, "bafy2bzacecxcp736xkl2mcyjlors3tug6vdlbispbzxvb75xlrhthiw2xwxvw", c.String())
+	require.Equal(t, "bafy2bzacecxcp736xkl2mcyjlors3tug6vdlbispbzxvb75xlrhthiw2xwxvw", c.String())
 
 	for i := 200; i < 400; i++ {
 		if _, err := n.Delete(ctx, strconv.Itoa(i)); err != nil {
@@ -770,8 +789,8 @@ func TestSetDeleteMany(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, "bafy2bzaceczhz54xmmz3xqnbmvxfbaty3qprr6dq7xh5vzwqbirlsnbd36z7a", c.String())
-	assert.Equal(t, bsStats{r: 0, w: 93, br: 0, bw: 11734}, trackingBs.stats)
+	require.Equal(t, "bafy2bzaceczhz54xmmz3xqnbmvxfbaty3qprr6dq7xh5vzwqbirlsnbd36z7a", c.String())
+	require.Equal(t, bsStats{r: 0, w: 93, br: 0, bw: 11734}, trackingBs.stats)
 }
 func TestForEach(t *testing.T) {
 	ctx := context.Background()
@@ -792,7 +811,7 @@ func TestForEach(t *testing.T) {
 		count++
 		return nil
 	})
-	assert.Equal(t, count, 200)
+	require.Equal(t, count, 200)
 
 	if err := n.Flush(ctx); err != nil {
 		t.Fatal(err)
@@ -801,7 +820,7 @@ func TestForEach(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, "bafy2bzaceczhz54xmmz3xqnbmvxfbaty3qprr6dq7xh5vzwqbirlsnbd36z7a", c.String())
+	require.Equal(t, "bafy2bzaceczhz54xmmz3xqnbmvxfbaty3qprr6dq7xh5vzwqbirlsnbd36z7a", c.String())
 
 	n, err = LoadNode(ctx, cs, c)
 	if err != nil {
@@ -814,7 +833,7 @@ func TestForEach(t *testing.T) {
 		count++
 		return nil
 	})
-	assert.Equal(t, count, 200)
+	require.Equal(t, count, 200)
 
 	// Cached nodes
 	count = 0
@@ -822,7 +841,7 @@ func TestForEach(t *testing.T) {
 		count++
 		return nil
 	})
-	assert.Equal(t, count, 200)
+	require.Equal(t, count, 200)
 
 	if err := n.Flush(ctx); err != nil {
 		t.Fatal(err)
@@ -831,9 +850,9 @@ func TestForEach(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, "bafy2bzaceczhz54xmmz3xqnbmvxfbaty3qprr6dq7xh5vzwqbirlsnbd36z7a", c.String())
+	require.Equal(t, "bafy2bzaceczhz54xmmz3xqnbmvxfbaty3qprr6dq7xh5vzwqbirlsnbd36z7a", c.String())
 
-	assert.Equal(t, bsStats{r: 30, w: 31, br: 3209, bw: 4529}, trackingBs.stats)
+	require.Equal(t, bsStats{r: 30, w: 31, br: 3209, bw: 4529}, trackingBs.stats)
 }
 
 func TestSetGet(t *testing.T) {
@@ -965,8 +984,8 @@ func TestReloadEmpty(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, "bafy2bzaceamp42wmmgr2g2ymg46euououzfyck7szknvfacqscohrvaikwfay", c.String())
-	assert.Equal(t, bsStats{r: 1, w: 2, br: 3, bw: 6}, trackingBs.stats)
+	require.Equal(t, "bafy2bzaceamp42wmmgr2g2ymg46euououzfyck7szknvfacqscohrvaikwfay", c.String())
+	require.Equal(t, bsStats{r: 1, w: 2, br: 3, bw: 6}, trackingBs.stats)
 }
 
 func TestCopy(t *testing.T) {
@@ -1412,29 +1431,29 @@ func TestCleanChildOrdering(t *testing.T) {
 	require.NoError(t, h.Flush(ctx))
 	root, err := cs.Put(ctx, h)
 	require.NoError(t, err)
-	// assert.Equal(t, "bafy2bzaced2mfx4zquihmrbqei2ghtbsf7bvupjzaiwkkgfmvpfrbud25gfli", root.String())
+	require.Equal(t, "bafy2bzacebqox3gtng4ytexyacr6zmaliyins3llnhbnfbcrqmhzuhmuuawqk", root.String())
 
 	h, err = LoadNode(ctx, cs, root, hamtOptions...)
 	require.NoError(t, err)
 
 	// Delete key 104 so child indexed at 20 has four pointers
 	found, err := h.Delete(ctx, makeKey(104))
-	assert.NoError(t, err)
-	assert.True(t, found)
+	require.NoError(t, err)
+	require.True(t, found)
 	found, err = h.Delete(ctx, makeKey(108))
-	assert.NoError(t, err)
-	assert.True(t, found)
+	require.NoError(t, err)
+	require.True(t, found)
 	err = h.Flush(ctx)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	root, err = cs.Put(ctx, h)
 
 	// Reload without error
 	require.NoError(t, err)
 	h, err = LoadNode(ctx, cs, root, hamtOptions...)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.Equal(t, "bafy2bzacedlyeuub3mo4aweqs7zyxrbldsq2u4a2taswubudgupglu2j4eru6", root.String())
-	assert.Equal(t, bsStats{r: 3, w: 11, br: 1449, bw: 1751}, trackingBs.stats)
+	require.Equal(t, "bafy2bzacedlyeuub3mo4aweqs7zyxrbldsq2u4a2taswubudgupglu2j4eru6", root.String())
+	require.Equal(t, bsStats{r: 3, w: 11, br: 1449, bw: 1751}, trackingBs.stats)
 }
 
 func TestPutOrderIndependent(t *testing.T) {
