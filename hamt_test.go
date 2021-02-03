@@ -117,16 +117,16 @@ func (h blockSizesHistogram) String() string {
 	return v + "]"
 }
 
-func randString() string {
+func randKey() string {
 	buf := make([]byte, 18)
 	rand.Read(buf)
 	return hex.EncodeToString(buf)
 }
 
-func randValue() []byte {
-	buf := make([]byte, 30)
+func randValue() *CborByteArray {
+	buf := CborByteArray(make([]byte, 30))
 	rand.Read(buf)
-	return buf
+	return &buf
 }
 
 func dotGraph(n *Node) {
@@ -155,16 +155,16 @@ var shortIdentityHash = func(k []byte) []byte {
 
 func TestCanonicalStructure(t *testing.T) {
 	// addAndRemoveKeys(t, []string{"K"}, []string{"B"}, "bafy2bzacecdihronbg6gyhpzhuiax3thpv5gxpunwczuanqym3r7wih3bkmb4", bsStats{r: 2, w: 4, br: 42, bw: 84}, UseHashFunction(identityHash))
-	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "bafy2bzacedrktzj4o7iumailmdzl5gz3uqr4bw2o72qg4zv5q7qhezy4r32bc", bsStats{r: 7, w: 10, br: 388, bw: 561}, UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "bafy2bzaceaqdaj5aqkwugr7wx4to3fahynoqlxuo5j6xznly3khazgyxihkbo", bsStats{r: 3, w: 6, br: 163, bw: 326}, UseHashFunction(identityHash))
 }
 
 func TestCanonicalStructureAlternateBitWidth(t *testing.T) {
-	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, "bafy2bzacedckymwjxmg35sllfegwrmnr7rxb3x7dh6muec2li2qhqjk5tf63q", bsStats{r: 2, w: 4, br: 32, bw: 64}, UseTreeBitWidth(7), UseHashFunction(identityHash))
-	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "bafy2bzaceckigpba3kck23qyuyb2i6vbiprtsmlr2rlyn3o4lmmcvzsh3l6wi", bsStats{r: 8, w: 11, br: 419, bw: 580}, UseTreeBitWidth(7), UseHashFunction(identityHash))
-	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, "bafy2bzacec2f6scvfmnyal5pzn43if6e2kls5jbm2jdab2xzuditctd5i3bbi", bsStats{r: 2, w: 4, br: 28, bw: 56}, UseTreeBitWidth(6), UseHashFunction(identityHash))
-	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "bafy2bzacedeeqff3p7n3ogqxvqslb2yrbi4ojz44sp6mvjwyp6u6lktxdo2fg", bsStats{r: 8, w: 11, br: 385, bw: 538}, UseTreeBitWidth(6), UseHashFunction(identityHash))
-	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, "bafy2bzacecnabvcxw7k5hgfcex5ig4jf3nabuxvl35edgnjk5ven2kg4n3ffm", bsStats{r: 2, w: 4, br: 26, bw: 52}, UseTreeBitWidth(5), UseHashFunction(identityHash))
-	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "bafy2bzacedc7hh2tyz66m7n7ricyw2m7whsgoplyux3kbxczla7zuf25wi2og", bsStats{r: 9, w: 12, br: 420, bw: 566}, UseTreeBitWidth(5), UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, "bafy2bzacedrwwndijql6lmmtyicjwyehxtgey5fhzocc43hrzhetrz25v2k2y", bsStats{r: 2, w: 4, br: 28, bw: 56}, UseTreeBitWidth(7), UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "bafy2bzacebhkyrwfexokaoygsx2crydq3fosiyfoa5bthphntmicsco2xf442", bsStats{r: 3, w: 6, br: 154, bw: 308}, UseTreeBitWidth(7), UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, "bafy2bzacebj7b2jahw7nxmu6mlhkwzucjmfq7aqlj52jusqtufqtaxcma4pdm", bsStats{r: 2, w: 4, br: 24, bw: 48}, UseTreeBitWidth(6), UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "bafy2bzaceb3c76qlbsiv3baogpao3zah56eqonsowpkof33o5hmncfow4seso", bsStats{r: 3, w: 6, br: 146, bw: 292}, UseTreeBitWidth(6), UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, "bafy2bzacec3cquclaqkb32cntwtizgij55b7isb4s5hv5hv5ujbbeu6clxkug", bsStats{r: 2, w: 4, br: 22, bw: 44}, UseTreeBitWidth(5), UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "bafy2bzacedbiipe7l7gbtjandyyl6rqlkuqr2im2nl7d4bljidv5mta22rjqk", bsStats{r: 3, w: 6, br: 139, bw: 278}, UseTreeBitWidth(5), UseHashFunction(identityHash))
 }
 
 func TestOverflow(t *testing.T) {
@@ -174,26 +174,26 @@ func TestOverflow(t *testing.T) {
 	}
 
 	cs := cbor.NewCborStore(newMockBlocks())
-	n := NewNode(cs, UseHashFunction(identityHash))
+	n, err := NewNode(cs, UseHashFunction(identityHash))
+	require.NoError(t, err)
+
 	for _, k := range keys[:3] {
-		if err := n.Set(context.Background(), k, "foobar"); err != nil {
-			t.Error(err)
-		}
+		err := n.Set(context.Background(), k, cborstr("foobar"))
+		assert.NoError(t, err)
 	}
 
 	// Try forcing the depth beyond 32
-	if err := n.Set(context.Background(), keys[3], "bad"); err != ErrMaxDepth {
+	if err := n.Set(context.Background(), keys[3], cborstr("bad")); err != ErrMaxDepth {
 		t.Errorf("expected error %q, got %q", ErrMaxDepth, err)
 	}
 
 	// Force _to_ max depth.
-	if err := n.Set(context.Background(), keys[3][1:], "bad"); err != nil {
-		t.Error(err)
-	}
+	err = n.Set(context.Background(), keys[3][1:], cborstr("bad"))
+	assert.NoError(t, err)
 
 	// Now, try fetching with a shorter hash function.
 	n.hash = shortIdentityHash
-	if err := n.Find(context.Background(), keys[0], nil); err != ErrMaxDepth {
+	if _, err := n.Find(context.Background(), keys[0], nil); err != ErrMaxDepth {
 		t.Errorf("expected error %q, got %q", ErrMaxDepth, err)
 	}
 }
@@ -201,19 +201,17 @@ func TestOverflow(t *testing.T) {
 func TestFillAndCollapse(t *testing.T) {
 	ctx := context.Background()
 	cs := cbor.NewCborStore(newMockBlocks())
-	root := NewNode(cs, UseTreeBitWidth(8), UseHashFunction(identityHash))
+	root, err := NewNode(cs, UseTreeBitWidth(8), UseHashFunction(identityHash))
+	assert.NoError(t, err)
 	val := randValue()
 
 	// start with a single node and a single full bucket
-	if err := root.Set(ctx, "AAAAAA11", val); err != nil {
-		t.Fatal(err)
-	}
-	if err := root.Set(ctx, "AAAAAA12", val); err != nil {
-		t.Fatal(err)
-	}
-	if err := root.Set(ctx, "AAAAAA21", val); err != nil {
-		t.Fatal(err)
-	}
+	err = root.Set(ctx, "AAAAAA11", val)
+	require.NoError(t, err)
+	err = root.Set(ctx, "AAAAAA12", val)
+	require.NoError(t, err)
+	err = root.Set(ctx, "AAAAAA21", val)
+	require.NoError(t, err)
 
 	st := stats(root)
 	fmt.Println(st)
@@ -223,15 +221,12 @@ func TestFillAndCollapse(t *testing.T) {
 	}
 
 	baseCid, err := cs.Put(ctx, root)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	// add a 4th colliding entry that forces a chain of new nodes to accommodate
 	// in a new node where there aren't collisions (7th byte)
-	if err := root.Set(ctx, "AAAAAA22", val); err != nil {
-		t.Fatal(err)
-	}
+	err = root.Set(ctx, "AAAAAA22", val)
+	require.NoError(t, err)
 
 	st = stats(root)
 	fmt.Println(st)
@@ -241,9 +236,9 @@ func TestFillAndCollapse(t *testing.T) {
 	}
 
 	// remove and we should be back to the same structure as before
-	if err := root.Delete(ctx, "AAAAAA22"); err != nil {
-		t.Fatal(err)
-	}
+	found, err := root.Delete(ctx, "AAAAAA22")
+	require.NoError(t, err)
+	require.True(t, found, "key not found")
 
 	st = stats(root)
 	fmt.Println(st)
@@ -253,24 +248,21 @@ func TestFillAndCollapse(t *testing.T) {
 	}
 
 	c, err := cs.Put(ctx, root)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+
 	if !c.Equals(baseCid) {
 		t.Fatal("CID mismatch on mutation")
 	}
 
 	// insert elements that collide at the 4th position so push the tree down by
 	// 3 nodes
-	if err := root.Set(ctx, "AAA11AA", val); err != nil {
-		t.Fatal(err)
-	}
-	if err := root.Set(ctx, "AAA12AA", val); err != nil {
-		t.Fatal(err)
-	}
-	if err := root.Set(ctx, "AAA13AA", val); err != nil {
-		t.Fatal(err)
-	}
+	err = root.Set(ctx, "AAA11AA", val)
+	require.NoError(t, err)
+	err = root.Set(ctx, "AAA12AA", val)
+	require.NoError(t, err)
+	err = root.Set(ctx, "AAA13AA", val)
+	require.NoError(t, err)
+
 	st = stats(root)
 	fmt.Println(st)
 	printHamt(root)
@@ -279,14 +271,11 @@ func TestFillAndCollapse(t *testing.T) {
 	}
 
 	midCid, err := cs.Put(ctx, root)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	// insert an overflow node that pushes the previous 4 into a separate node
-	if err := root.Set(ctx, "AAA14AA", val); err != nil {
-		t.Fatal(err)
-	}
+	err = root.Set(ctx, "AAA14AA", val)
+	require.NoError(t, err)
 
 	st = stats(root)
 	fmt.Println(st)
@@ -296,9 +285,8 @@ func TestFillAndCollapse(t *testing.T) {
 	}
 
 	// put the colliding 4th back in that will push down to full height
-	if err := root.Set(ctx, "AAAAAA22", val); err != nil {
-		t.Fatal(err)
-	}
+	err = root.Set(ctx, "AAAAAA22", val)
+	require.NoError(t, err)
 
 	st = stats(root)
 	fmt.Println(st)
@@ -308,9 +296,9 @@ func TestFillAndCollapse(t *testing.T) {
 	}
 
 	// rewind back one step
-	if err := root.Delete(ctx, "AAAAAA22"); err != nil {
-		t.Fatal(err)
-	}
+	found, err = root.Delete(ctx, "AAAAAA22")
+	require.NoError(t, err)
+	require.True(t, found, "key not found")
 
 	st = stats(root)
 	fmt.Println(st)
@@ -320,9 +308,10 @@ func TestFillAndCollapse(t *testing.T) {
 	}
 
 	// rewind another step
-	if err := root.Delete(ctx, "AAA14AA"); err != nil {
-		t.Fatal(err)
-	}
+	found, err = root.Delete(ctx, "AAA14AA")
+	require.NoError(t, err)
+	require.True(t, found, "key not found")
+
 	st = stats(root)
 	fmt.Println(st)
 	printHamt(root)
@@ -331,23 +320,22 @@ func TestFillAndCollapse(t *testing.T) {
 	}
 
 	c, err = cs.Put(ctx, root)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+
 	if !c.Equals(midCid) {
 		t.Fatal("CID mismatch on mutation")
 	}
 
 	// remove the 3 colliding node so we should be back to the initial state
-	if err := root.Delete(ctx, "AAA11AA"); err != nil {
-		t.Fatal(err)
-	}
-	if err := root.Delete(ctx, "AAA12AA"); err != nil {
-		t.Fatal(err)
-	}
-	if err := root.Delete(ctx, "AAA13AA"); err != nil {
-		t.Fatal(err)
-	}
+	found, err = root.Delete(ctx, "AAA11AA")
+	require.NoError(t, err)
+	require.True(t, found, "key not found")
+	found, err = root.Delete(ctx, "AAA12AA")
+	require.NoError(t, err)
+	require.True(t, found, "key not found")
+	found, err = root.Delete(ctx, "AAA13AA")
+	require.NoError(t, err)
+	require.True(t, found, "key not found")
 
 	st = stats(root)
 	fmt.Println(st)
@@ -358,9 +346,7 @@ func TestFillAndCollapse(t *testing.T) {
 
 	// should have the same CID as original
 	c, err = cs.Put(ctx, root)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if !c.Equals(baseCid) {
 		t.Fatal("CID mismatch on mutation")
 	}
@@ -368,50 +354,47 @@ func TestFillAndCollapse(t *testing.T) {
 
 func addAndRemoveKeys(t *testing.T, keys []string, extraKeys []string, cid string, stats bsStats, options ...Option) {
 	ctx := context.Background()
-	vals := make(map[string]int)
+	vals := make(map[string]*CborByteArray)
 	for i := 0; i < len(keys); i++ {
 		s := keys[i]
-		vals[s] = i
+		vals[s] = cborstr(strconv.Itoa(i))
 	}
 
 	trackingBs := newMockBlocks()
 	cs := cbor.NewCborStore(trackingBs)
-	begn := NewNode(cs, options...)
+	begn, err := NewNode(cs, options...)
+	require.NoError(t, err)
 	for _, k := range keys {
-		if err := begn.Set(ctx, k, vals[k]); err != nil {
-			t.Fatal(err)
-		}
+		err := begn.Set(ctx, k, vals[k])
+		require.NoError(t, err)
 	}
 
 	fmt.Println(trackingBs.stats)
 
 	// fmt.Println("start flush")
 	// bef := time.Now()
-	if err := begn.Flush(ctx); err != nil {
-		t.Fatal(err)
-	}
+	err = begn.Flush(ctx)
+	require.NoError(t, err)
+
 	// fmt.Println("flush took: ", time.Since(bef))
 	c, err := cs.Put(ctx, begn)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	fmt.Println(trackingBs.stats)
 
 	var n Node
-	if err := cs.Get(ctx, c, &n); err != nil {
-		t.Fatal(err)
-	}
+	err = cs.Get(ctx, c, &n)
+	require.NoError(t, err)
+
 	n.store = cs
 	n.hash = begn.hash
 	n.bitWidth = begn.bitWidth
 
 	for k, v := range vals {
-		var out int
-		err := n.Find(ctx, k, &out)
-		if err != nil {
-			t.Fatalf("should have found the thing (err: %s)", err)
-		}
-		if out != v {
+		var out CborByteArray
+		found, err := n.Find(ctx, k, &out)
+		require.NoError(t, err)
+		require.True(t, found, "key not found")
+		if !bytes.Equal(out, *v) {
 			t.Fatalf("got wrong value after value change: %x != %x", out, v)
 		}
 	}
@@ -420,28 +403,26 @@ func addAndRemoveKeys(t *testing.T, keys []string, extraKeys []string, cid strin
 
 	// create second hamt by adding and deleting the extra keys
 	for i := 0; i < len(extraKeys); i++ {
-		begn.Set(ctx, extraKeys[i], i)
+		err := begn.Set(ctx, extraKeys[i], cborstr(strconv.Itoa(i)))
+		require.NoError(t, err)
 	}
 	for i := 0; i < len(extraKeys); i++ {
-		if err := begn.Delete(ctx, extraKeys[i]); err != nil {
-			t.Fatal(err)
-		}
+		found, err := begn.Delete(ctx, extraKeys[i])
+		require.NoError(t, err)
+		require.True(t, found, "key not found")
 	}
 
-	if err := begn.Flush(ctx); err != nil {
-		t.Fatal(err)
-	}
+	err = begn.Flush(ctx)
+	require.NoError(t, err)
 	c2, err := cs.Put(ctx, begn)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	fmt.Println(trackingBs.stats)
 
 	var n2 Node
-	if err := cs.Get(ctx, c2, &n2); err != nil {
-		t.Fatal(err)
-	}
+	err = cs.Get(ctx, c2, &n2)
+	require.NoError(t, err)
+
 	n2.store = cs
 	n2.hash = begn.hash
 	n2.bitWidth = begn.bitWidth
@@ -561,100 +542,146 @@ func TestSha256(t *testing.T) {
 func testBasic(t *testing.T, options ...Option) {
 	ctx := context.Background()
 	cs := cbor.NewCborStore(newMockBlocks())
-	begn := NewNode(cs, options...)
+	begn, err := NewNode(cs, options...)
+	require.NoError(t, err)
 
-	val := []byte("cat dog bear")
-	if err := begn.Set(ctx, "foo", val); err != nil {
-		t.Fatal(err)
-	}
+	val := cborstr("cat dog bear")
+	err = begn.Set(ctx, "foo", val)
+	require.NoError(t, err)
 
 	for i := 0; i < 1000; i++ {
-		if err := begn.Set(ctx, randString(), randValue()); err != nil {
-			t.Fatal(err)
-		}
+		err := begn.Set(ctx, randKey(), randValue())
+		require.NoError(t, err)
 	}
+	require.NoError(t, begn.Flush(ctx))
 
-	if err := begn.Flush(ctx); err != nil {
-		t.Fatal(err)
-	}
 	c, err := cs.Put(ctx, begn)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	n, err := LoadNode(ctx, cs, c, options...)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
-	var out []byte
-	if err := n.Find(ctx, "foo", &out); err != nil {
-		t.Fatal(err)
-	}
-
-	if !bytes.Equal(out, val) {
+	var out CborByteArray
+	found, err := n.Find(ctx, "foo", &out)
+	require.NoError(t, err)
+	require.True(t, found, "key not found")
+	if !bytes.Equal(out, *val) {
 		t.Fatal("out bytes were wrong: ", out)
 	}
+}
+
+func TestSetIfAbsent(t *testing.T) {
+	ctx := context.Background()
+	trackingBs := newMockBlocks()
+	cs := cbor.NewCborStore(trackingBs)
+	begn, err := NewNode(cs, UseHashFunction(shaHash))
+	require.NoError(t, err)
+
+	val1 := cborstr("owl bear")
+	key := "favorite-animal"
+	success, err := begn.SetIfAbsent(ctx, key, val1)
+	require.NoError(t, err)
+	if !success {
+		t.Fatal("expected fresh set to work")
+	}
+
+	val2 := cborstr("bright green bear")
+	success, err = begn.SetIfAbsent(ctx, key, val2)
+	require.NoError(t, err)
+	if success {
+		t.Fatal("expected duplicate set to fail")
+	}
+
+	success, err = begn.SetIfAbsent(ctx, key, val1)
+	require.NoError(t, err)
+
+	if success {
+		t.Fatal("expected duplicate set with same value to also fail")
+	}
+
+	// Behavior persists across flushes
+	require.NoError(t, begn.Flush(ctx))
+	c, err := cs.Put(ctx, begn)
+	require.NoError(t, err)
+	n, err := LoadNode(ctx, cs, c)
+	require.NoError(t, err)
+
+	success, err = n.SetIfAbsent(ctx, key, val2)
+	require.NoError(t, err)
+	if success {
+		t.Fatal("expected duplicate set after flush to fail")
+	}
+}
+
+func TestSetWithNoEffectDoesNotPut(t *testing.T) {
+	ctx := context.Background()
+	mb := newMockBlocks()
+	cs := cbor.NewCborStore(mb)
+	begn, err := NewNode(cs, UseTreeBitWidth(1)) // branching factor of 2 to fill up root node quickly
+	require.NoError(t, err)
+
+	// Fill up the root node so flushes actually Put to store
+	fillUpEntries := 2 * bucketSize * 5 // do 5 x the amount needed to fill up root node to fill with high probability
+	for i := 0; i < fillUpEntries; i++ {
+		require.NoError(t, begn.Set(ctx, strconv.Itoa(i), cborstr("filler")))
+	}
+	require.NoError(t, begn.Flush(ctx))
+
+	key := "favorite-animal"
+	val1 := cborstr("bright green bear")
+	require.NoError(t, begn.Set(ctx, key, val1))
+	require.NoError(t, begn.Flush(ctx))
+
+	// firstPutCount := mb.stats.evtcntPut
+	// if firstPutCount <= 0 {
+	// 	t.Fatal("expect first flush to Put to store")
+	// }
+
+	// Set does not change key value mapping
+	require.NoError(t, begn.Set(ctx, key, val1))
+	require.NoError(t, begn.Flush(ctx))
+
+	// secondPutCount := mb.stats.evtcntPut
+	// if secondPutCount != firstPutCount {
+	// 	t.Fatalf("expected first Put count %d to equal second Put count %d", firstPutCount, secondPutCount)
+	// }
 }
 
 func TestDelete(t *testing.T) {
 	ctx := context.Background()
 	trackingBs := newMockBlocks()
 	cs := cbor.NewCborStore(trackingBs)
-	begn := NewNode(cs, UseHashFunction(shaHash))
+	begn, err := NewNode(cs)
+	require.NoError(t, err)
 
-	if err := begn.Set(ctx, "foo", []byte("cat dog bear")); err != nil {
-		t.Fatal(err)
-	}
-	if err := begn.Set(ctx, "bar", []byte("cat dog")); err != nil {
-		t.Fatal(err)
-	}
-	if err := begn.Set(ctx, "baz", []byte("cat")); err != nil {
-		t.Fatal(err)
+	val := cborstr("cat dog bear")
+	err = begn.Set(ctx, "foo", val)
+	require.NoError(t, err)
+
+	for i := 0; i < 10; i++ {
+		err := begn.Set(ctx, randKey(), randValue())
+		require.NoError(t, err)
 	}
 
 	if err := begn.Flush(ctx); err != nil {
 		t.Fatal(err)
 	}
-	c, err := cs.Put(ctx, begn)
+	c2, err := cs.Put(ctx, begn)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, "bafy2bzacebhjoag2qmyibmvvzq372pg2evlkchovqdksmna4hm7py5itnrlhg", c.String())
-
-	n, err := LoadNode(ctx, cs, c)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := n.Delete(ctx, "foo"); err != nil {
-		t.Fatal(err)
-	}
-
-	var out []byte
-	if err := n.Find(ctx, "foo", &out); err == nil {
-		t.Fatal("shouldnt have found object")
-	}
-
-	if err := n.Flush(ctx); err != nil {
-		t.Fatal(err)
-	}
-	c2, err := cs.Put(ctx, n)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assert.Equal(t, "bafy2bzaceczehhtzfhg4ijrkv2omajt5ygwbd6srqhhtkxgd2hjttpihxs5ky", c2.String())
-	assert.Equal(t, bsStats{r: 1, w: 2, br: 88, bw: 154}, trackingBs.stats)
+	assert.Equal(t, "bafy2bzacecnvmfb5czmbuv327imlcgrbj6wzqi7rfwdla6r5kwkmildsbanzq", c2.String())
+	assert.Equal(t, bsStats{r: 0, w: 1, br: 0, bw: 775}, trackingBs.stats)
 }
 func TestDeleteCase(t *testing.T) {
 	ctx := context.Background()
 	trackingBs := newMockBlocks()
 	cs := cbor.NewCborStore(trackingBs)
-	begn := NewNode(cs, UseHashFunction(shaHash))
+	begn, err := NewNode(cs, UseHashFunction(shaHash))
+	require.NoError(t, err)
 
-	if err := begn.Set(ctx, string([]byte{0}), []byte("Test data")); err != nil {
+	if err := begn.Set(ctx, string([]byte{0}), cborstr("Test data")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -666,21 +693,20 @@ func TestDeleteCase(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, "bafy2bzacecngbbdw3ut45b3tnsan3fgxwlsnit25unejfmh4ihlhkxr2hutuo", c.String())
+	assert.Equal(t, "bafy2bzaceb2hikcc6tfuuuuehjstbiq356oruwx6ejyse77zupq445unranv6", c.String())
 
 	n, err := LoadNode(ctx, cs, c)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := n.Delete(ctx, string([]byte{0})); err != nil {
+	if _, err := n.Delete(ctx, string([]byte{0})); err != nil {
 		t.Fatal(err)
 	}
 
-	var out []byte
-	if err := n.Find(ctx, string([]byte{0}), &out); err == nil {
-		t.Fatal("shouldnt have found object")
-	}
+	var out CborByteArray
+	found, err := n.Find(ctx, string([]byte{0}), &out)
+	require.False(t, found)
 
 	if err := n.Flush(ctx); err != nil {
 		t.Fatal(err)
@@ -691,17 +717,18 @@ func TestDeleteCase(t *testing.T) {
 	}
 
 	assert.Equal(t, "bafy2bzaceamp42wmmgr2g2ymg46euououzfyck7szknvfacqscohrvaikwfay", c2.String())
-	assert.Equal(t, bsStats{r:1, w:2, br:34, bw:37}, trackingBs.stats)
+	assert.Equal(t, bsStats{r: 1, w: 2, br: 31, bw: 34}, trackingBs.stats)
 }
 
 func TestSetDeleteMany(t *testing.T) {
 	ctx := context.Background()
 	trackingBs := newMockBlocks()
 	cs := cbor.NewCborStore(trackingBs)
-	n := NewNode(cs, UseTreeBitWidth(5), UseHashFunction(shaHash))
+	n, err := NewNode(cs, UseTreeBitWidth(5), UseHashFunction(shaHash))
+	require.NoError(t, err)
 
 	for i := 0; i < 200; i++ {
-		if err := n.Set(ctx, strconv.Itoa(i), i); err != nil {
+		if err := n.Set(ctx, strconv.Itoa(i), cborstr(strconv.Itoa(i))); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -713,10 +740,10 @@ func TestSetDeleteMany(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, "bafy2bzaceaneyzybb37pn4rtg2mvn2qxb43rhgmqoojgtz7avdfjw2lhz4dge", c.String())
+	assert.Equal(t, "bafy2bzaceczhz54xmmz3xqnbmvxfbaty3qprr6dq7xh5vzwqbirlsnbd36z7a", c.String())
 
 	for i := 200; i < 400; i++ {
-		if err := n.Set(ctx, strconv.Itoa(i), i); err != nil {
+		if err := n.Set(ctx, strconv.Itoa(i), cborstr(strconv.Itoa(i))); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -728,10 +755,10 @@ func TestSetDeleteMany(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, "bafy2bzaceaqmub32nf33s3joo6x2l3schxreuow7jkla7a27l7qcrsb2elzay", c.String())
+	assert.Equal(t, "bafy2bzacecxcp736xkl2mcyjlors3tug6vdlbispbzxvb75xlrhthiw2xwxvw", c.String())
 
 	for i := 200; i < 400; i++ {
-		if err := n.Delete(ctx, strconv.Itoa(i)); err != nil {
+		if _, err := n.Delete(ctx, strconv.Itoa(i)); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -743,34 +770,25 @@ func TestSetDeleteMany(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, "bafy2bzaceaneyzybb37pn4rtg2mvn2qxb43rhgmqoojgtz7avdfjw2lhz4dge", c.String())
-	assert.Equal(t, bsStats{r: 87, w: 119, br: 7671, bw: 14042}, trackingBs.stats)
-}
-	if err := n.Flush(ctx); err != nil {
-		t.Fatal(err)
-	}
-	c, err = cs.Put(ctx, n)
-	if err != nil {
-		t.Fatal(err)
-	}
-	assert.Equal(t, "bafy2bzaceaneyzybb37pn4rtg2mvn2qxb43rhgmqoojgtz7avdfjw2lhz4dge", c.String())
-	assert.Equal(t, bsStats{r: 87, w: 119, br: 7671, bw: 14042}, trackingBs.stats)
+	assert.Equal(t, "bafy2bzaceczhz54xmmz3xqnbmvxfbaty3qprr6dq7xh5vzwqbirlsnbd36z7a", c.String())
+	assert.Equal(t, bsStats{r: 0, w: 93, br: 0, bw: 11734}, trackingBs.stats)
 }
 func TestForEach(t *testing.T) {
 	ctx := context.Background()
 	trackingBs := newMockBlocks()
 	cs := cbor.NewCborStore(trackingBs)
-	n := NewNode(cs, UseTreeBitWidth(5), UseHashFunction(shaHash))
+	n, err := NewNode(cs, UseTreeBitWidth(5), UseHashFunction(shaHash))
+	require.NoError(t, err)
 
 	for i := 0; i < 200; i++ {
-		if err := n.Set(ctx, strconv.Itoa(i), i); err != nil {
+		if err := n.Set(ctx, strconv.Itoa(i), cborstr(strconv.Itoa(i))); err != nil {
 			t.Fatal(err)
 		}
 	}
 
 	// Dirty cached nodes
 	count := 0
-	err := n.ForEach(ctx, func(k string, v interface{}) error {
+	err = n.ForEach(ctx, func(k string, v *cbg.Deferred) error {
 		count++
 		return nil
 	})
@@ -783,7 +801,7 @@ func TestForEach(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, "bafy2bzaceaneyzybb37pn4rtg2mvn2qxb43rhgmqoojgtz7avdfjw2lhz4dge", c.String())
+	assert.Equal(t, "bafy2bzaceczhz54xmmz3xqnbmvxfbaty3qprr6dq7xh5vzwqbirlsnbd36z7a", c.String())
 
 	n, err = LoadNode(ctx, cs, c)
 	if err != nil {
@@ -792,7 +810,7 @@ func TestForEach(t *testing.T) {
 
 	// Run with no cache
 	count = 0
-	err = n.ForEach(ctx, func(k string, v interface{}) error {
+	err = n.ForEach(ctx, func(k string, v *cbg.Deferred) error {
 		count++
 		return nil
 	})
@@ -800,7 +818,7 @@ func TestForEach(t *testing.T) {
 
 	// Cached nodes
 	count = 0
-	err = n.ForEach(ctx, func(k string, v interface{}) error {
+	err = n.ForEach(ctx, func(k string, v *cbg.Deferred) error {
 		count++
 		return nil
 	})
@@ -813,55 +831,50 @@ func TestForEach(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, "bafy2bzaceaneyzybb37pn4rtg2mvn2qxb43rhgmqoojgtz7avdfjw2lhz4dge", c.String())
+	assert.Equal(t, "bafy2bzaceczhz54xmmz3xqnbmvxfbaty3qprr6dq7xh5vzwqbirlsnbd36z7a", c.String())
 
-	assert.Equal(t, bsStats{r: 59, w: 89, br: 4841, bw: 8351}, trackingBs.stats)
+	assert.Equal(t, bsStats{r: 30, w: 31, br: 3209, bw: 4529}, trackingBs.stats)
 }
 
 func TestSetGet(t *testing.T) {
 	ctx := context.Background()
-	vals := make(map[string][]byte)
+	vals := make(map[string]*CborByteArray)
 	var keys []string
 	for i := 0; i < 100000; i++ {
-		s := randString()
+		s := randKey()
 		vals[s] = randValue()
 		keys = append(keys, s)
 	}
 
 	cs := cbor.NewCborStore(newMockBlocks())
-	begn := NewNode(cs)
+	begn, err := NewNode(cs)
+	require.NoError(t, err)
+
 	for _, k := range keys {
-		if err := begn.Set(ctx, k, vals[k]); err != nil {
-			t.Fatal(err)
-		}
+		err := begn.Set(ctx, k, vals[k])
+		require.NoError(t, err)
 	}
 
 	size, err := begn.checkSize(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	mapsize := 0
 	for k, v := range vals {
-		mapsize += (len(k) + len(v))
+		mapsize += (len(k) + len(*v))
 	}
 	fmt.Printf("Total size is: %d, size of keys+vals: %d, overhead: %.2f\n", size, mapsize, float64(size)/float64(mapsize))
 	fmt.Println(stats(begn))
 
 	fmt.Println("start flush")
 	bef := time.Now()
-	if err := begn.Flush(ctx); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, begn.Flush(ctx))
 	fmt.Println("flush took: ", time.Since(bef))
 	c, err := cs.Put(ctx, begn)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	var n Node
-	if err := cs.Get(ctx, c, &n); err != nil {
-		t.Fatal(err)
-	}
+	err = cs.Get(ctx, c, &n)
+	require.NoError(t, err)
+
 	n.store = cs
 	n.hash = defaultHashFunction
 	n.bitWidth = defaultBitWidth
@@ -869,75 +882,66 @@ func TestSetGet(t *testing.T) {
 	//for k, v := range vals {
 	for _, k := range keys {
 		v := vals[k]
-		var out []byte
-		if err := n.Find(ctx, k, &out); err != nil {
-			t.Fatal("should have found the thing: ", err)
-		}
-		if !bytes.Equal(out, v) {
+		var out CborByteArray
+		found, err := n.Find(ctx, k, &out)
+		require.NoError(t, err)
+		require.True(t, found, "key not found")
+		if !bytes.Equal(out, *v) {
 			t.Fatal("got wrong value")
 		}
 	}
 	fmt.Println("finds took: ", time.Since(bef))
 
 	for i := 0; i < 100; i++ {
-		err := n.Find(ctx, randString(), nil)
-		if err != ErrNotFound {
-			t.Fatal("should have gotten ErrNotFound, instead got: ", err)
-		}
+		found, err := n.Find(ctx, randKey(), nil)
+		require.NoError(t, err)
+		require.False(t, found, "expected not found")
 	}
 
 	for k := range vals {
 		next := randValue()
-		n.Set(ctx, k, next)
+		err := n.Set(ctx, k, next)
+		require.NoError(t, err)
 		vals[k] = next
 	}
 
 	for k, v := range vals {
-		var out []byte
-		err := n.Find(ctx, k, &out)
-		if err != nil {
-			t.Fatal("should have found the thing")
-		}
-		if !bytes.Equal(out, v) {
+		var out CborByteArray
+		found, err := n.Find(ctx, k, &out)
+		require.NoError(t, err)
+		require.True(t, found, "key not found")
+		if !bytes.Equal(out, *v) {
 			t.Fatal("got wrong value after value change")
 		}
 	}
 
 	for i := 0; i < 100; i++ {
-		err := n.Delete(ctx, randString())
-		if err != ErrNotFound {
-			t.Fatal("should have gotten ErrNotFound, instead got: ", err)
-		}
+		found, err := n.Delete(ctx, randKey())
+		require.NoError(t, err)
+		require.False(t, found, "expected not found")
 	}
 
 	for _, k := range keys {
-		if err := n.Delete(ctx, k); err != nil {
-			t.Fatal(err)
-		}
-		if err := n.Find(ctx, k, nil); err != ErrNotFound {
-			t.Fatal("Expected ErrNotFound, got: ", err)
-		}
+		found, err := n.Delete(ctx, k)
+		require.NoError(t, err)
+		require.True(t, found, "key not found")
+
+		found, err = n.Find(ctx, k, nil)
+		require.NoError(t, err)
+		require.False(t, found, "expected not found")
 	}
 }
 
 func nodesEqual(t *testing.T, store cbor.IpldStore, n1, n2 *Node) bool {
 	ctx := context.Background()
 	err := n1.Flush(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	n1Cid, err := store.Put(ctx, n1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	err = n2.Flush(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	n2Cid, err := store.Put(ctx, n2)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	return n1Cid.Equals(n2Cid)
 }
 
@@ -946,11 +950,11 @@ func TestReloadEmpty(t *testing.T) {
 	trackingBs := newMockBlocks()
 	cs := cbor.NewCborStore(trackingBs)
 
-	n := NewNode(cs)
+	n, err := NewNode(cs)
+	require.NoError(t, err)
+
 	c, err := cs.Put(ctx, n)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	_, err = LoadNode(ctx, cs, c)
 	if err != nil {
@@ -969,17 +973,21 @@ func TestCopy(t *testing.T) {
 	ctx := context.Background()
 	cs := cbor.NewCborStore(newMockBlocks())
 
-	n := NewNode(cs)
+	n, err := NewNode(cs)
+	require.NoError(t, err)
+
 	nc := n.Copy()
 	if !nodesEqual(t, cs, n, nc) {
 		t.Fatal("nodes should be equal")
 	}
-	n.Set(ctx, "key", []byte{0x01})
+	err = n.Set(ctx, "key", cborstr("a"))
+	require.NoError(t, err)
 	if nodesEqual(t, cs, n, nc) {
 		t.Fatal("nodes should not be equal -- we set a key on n")
 	}
 	nc = n.Copy()
-	nc.Set(ctx, "key2", []byte{0x02})
+	err = nc.Set(ctx, "key2", cborstr("b"))
+	require.NoError(t, err)
 	if nodesEqual(t, cs, n, nc) {
 		t.Fatal("nodes should not be equal -- we set a key on nc")
 	}
@@ -992,7 +1000,8 @@ func TestCopy(t *testing.T) {
 func TestCopyCopiesNilSlices(t *testing.T) {
 	cs := cbor.NewCborStore(newMockBlocks())
 
-	n := NewNode(cs)
+	n, err := NewNode(cs)
+	require.NoError(t, err)
 	pointer := &Pointer{}
 	n.Pointers = append(n.Pointers, pointer)
 
@@ -1012,15 +1021,21 @@ func TestCopyWithoutFlush(t *testing.T) {
 	cs := cbor.NewCborStore(newMockBlocks())
 
 	count := 200
-	n := NewNode(cs)
+	n, err := NewNode(cs)
+	require.NoError(t, err)
+
 	for i := 0; i < count; i++ {
-		n.Set(ctx, fmt.Sprintf("key%d", i), []byte{byte(i)})
+		v := cbg.CborInt(i)
+		err := n.Set(ctx, fmt.Sprintf("key%d", i), &v)
+		require.NoError(t, err)
 	}
 
-	n.Flush(ctx)
+	require.NoError(t, n.Flush(ctx))
 
 	for i := 0; i < count; i++ {
-		n.Set(ctx, fmt.Sprintf("key%d", i), []byte{byte(count + i)})
+		v := cbg.CborInt(count + i)
+		err := n.Set(ctx, fmt.Sprintf("key%d", i), &v)
+		require.NoError(t, err)
 	}
 
 	nc := n.Copy()
@@ -1028,106 +1043,57 @@ func TestCopyWithoutFlush(t *testing.T) {
 	for i := 0; i < count; i++ {
 		key := fmt.Sprintf("key%d", i)
 
-		var val []byte
-		if err := n.Find(ctx, key, &val); err != nil {
-			t.Fatalf("should have found key %s in original", key)
+		var val cbg.CborInt
+		found, err := n.Find(ctx, key, &val)
+		require.NoError(t, err)
+		require.True(t, found, "key not found")
+
+		var valCopy cbg.CborInt
+		found, err = nc.Find(ctx, key, &valCopy)
+		require.NoError(t, err)
+		require.True(t, found, "key not found")
+
+		if val != valCopy {
+			t.Fatalf("copy does not equal original (%d != %d)", valCopy, val)
 		}
-
-		var valCopy []byte
-		if err := nc.Find(ctx, key, &valCopy); err != nil {
-			t.Fatalf("should have found key %s in copy", key)
-		}
-
-		if val[0] != valCopy[0] {
-			t.Fatalf("copy does not equal original (%d != %d)", valCopy[0], val[0])
-		}
 	}
-}
-
-func TestValueLinking(t *testing.T) {
-	ctx := context.Background()
-	cs := cbor.NewCborStore(newMockBlocks())
-
-	thingy1 := map[string]string{"cat": "dog"}
-	c1, err := cs.Put(ctx, thingy1)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	thingy2 := map[string]interface{}{
-		"one": c1,
-		"foo": "bar",
-	}
-
-	n := NewNode(cs)
-
-	if err := n.Set(ctx, "cat", thingy2); err != nil {
-		t.Fatal(err)
-	}
-
-	tcid, err := cs.Put(ctx, n)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	blk, err := cs.Blocks.Get(tcid)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	fmt.Printf("BLOCK DATA: %x\n", blk.RawData())
-	nd, err := cbor.DecodeBlock(blk)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	fmt.Println("thingy1", c1)
-	fmt.Println(nd.Links()[0])
 }
 
 func TestSetNilValues(t *testing.T) {
 	ctx := context.Background()
 	cs := cbor.NewCborStore(newMockBlocks())
 
-	n := NewNode(cs)
+	n, err := NewNode(cs)
+	require.NoError(t, err)
 
 	k := make([]byte, 1)
 
 	for i := 0; i < 500; i++ {
 		k[0] = byte(i)
 		var um cbg.CBORMarshaler
-		if err := n.Set(ctx, string(k), um); err != nil {
-			t.Fatal(err)
-		}
+		err := n.Set(ctx, string(k), um)
+		require.NoError(t, err)
 	}
 
-	nn := NewNode(cs)
+	nn, err := NewNode(cs)
+	require.NoError(t, err)
 
 	rc, err := cs.Put(ctx, nn)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	for i := 0; i < 500; i++ {
 		tn, err := LoadNode(ctx, cs, rc)
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 
 		k[0] = byte(i)
 		var n cbg.CBORMarshaler
-		if err := tn.Set(ctx, string(k), n); err != nil {
-			t.Fatal(err)
-		}
+		err = tn.Set(ctx, string(k), n)
+		require.NoError(t, err)
 
-		if err := tn.Flush(ctx); err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, tn.Flush(ctx))
 
 		rc, err = cs.Put(ctx, tn)
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 	}
 }
 
@@ -1140,9 +1106,7 @@ func TestMalformedHamt(t *testing.T) {
 	cs := cbor.NewCborStore(blocks)
 	bcid, err := cid.Decode("bafy2bzaceab7vkg5c3zti7ebqensb3onksjkc4wwktkiledkezgvnbvzs4cti")
 	bccid, err := cid.Decode("bafy2bzaceab7vkg5c3zti7ebqensb3onksjkc4wwktkiledkezgvnbvzs4cqa")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	// just the bcid bytes, without the tag
 	cidBytes, _ := hex.DecodeString("000171A0E4022003FAA8DD16F3347C81811B20EDCD5492A172D654D485906A264D5686B9970534")
 	// just the bccid bytes, without the tag, prefixed with 0x00 for dag-cbor
@@ -1156,16 +1120,14 @@ func TestMalformedHamt(t *testing.T) {
 	}
 	load := func() *Node {
 		n, err := LoadNode(ctx, cs, bcid, UseTreeBitWidth(8), UseHashFunction(identityHash))
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 		return n
 	}
 	find := func(key []byte, expected []byte) *[]byte {
-		vg, err := load().FindRaw(ctx, string(key))
-		if err != nil {
-			t.Fatal(err)
-		}
+		found, vg, err := load().FindRaw(ctx, string(key))
+		require.NoError(t, err)
+		require.True(t, found, "key not found")
+
 		// should find a bytes(1) "\xff"
 		if !bytes.Equal(vg, expected) {
 			return &vg
@@ -1184,10 +1146,9 @@ func TestMalformedHamt(t *testing.T) {
 				bcat(b(0x40+1), b(kv.key)),    // bytes(1) "\x??"
 				bcat(b(0x40+1), b(kv.value)))) // bytes(1) "\x??"
 		}
-		return bcat(b(0xa0+1), // map(1)
-			bcat(b(0x60+1), b(0x31)), // string(1) "1"
-			bcat(b(0x80+byte(len(kvs))), // array(?)
-				en)) // bucket contents
+		return bcat(
+			b(0x80+byte(len(kvs))), // array(?)
+			en)                     // bucket contents
 	}
 
 	// most minimal HAMT node with one k/v entry, sanity check we can load this
@@ -1244,53 +1205,15 @@ func TestMalformedHamt(t *testing.T) {
 		t.Fatal("Should have returned ErrMalformedHamt for mismatch bitfield count")
 	}
 
-	// test mixed link & bucket
-
-	// this node contains 2 elements, the first is a plain entry with one bucket
-	// and with a single key of 0x0100, the second element is a link to a child
-	// node which happens to be the same CID as this node will be stored in.
-	// However, this second entry has both a CID and a bucket in the same
-	// element, which is not allowed. Without checks for exactly one of these
-	// two things then then a lookup for key 0x0100 would navigate through this
-	// node and back again as its own child to the first element.
-	store(
-		bcat(b(0x80+2), // array(2)
-			bcat(b(0x40+1), b(0x03)), // bytes(1) "\x03" (bitmap)
-			bcat(b(0x80+2), // array(2)
-				bcat(b(0xa0+1), // map(1)
-					bcat(b(0x60+1), b(0x31)), // string(1) "1"
-					bcat(b(0x80+1), // array(1)
-						bcat(b(0x80+2), // array(2)
-							bcat(b(0x40+2), []byte{0x01, 0x00}), // bytes(2) "\x0100"
-							bcat(b(0x40+1), b(0xff))))),         // bytes(1) "\xff"
-				bcat(b(0xa0+2), // map(2)
-					bcat(b(0x60+1), b(0x30)), // string(1) "0"
-					bcat(b(0xd8), b(0x2a), // tag(42)
-						b(0x58), b(0x27), // bytes(39)
-						cidBytes), // cid
-					bcat(b(0x60+1), b(0x31)), // string(1) "1"
-					bcat(b(0x80+1), // array(1)
-						bcat(b(0x80+2), // array(2)
-							bcat(b(0x40+1), b(0x01)),      // bytes(1) "\x00"
-							bcat(b(0x40+1), b(0xfe)))))))) // bytes(1) "\xff
-
-	n, err = LoadNode(ctx, cs, bcid, UseTreeBitWidth(8), UseHashFunction(identityHash))
-	if err == nil || n != nil || err.Error() != "Pointers should be a single element map" {
-		// no ErrMalformedHamt here possible bcause of cbor-gen wrapping
-		t.Fatal("Should have returned error for bad Pointer cbor")
-	}
-
 	// test pointers with links have are DAG-CBOR multicodec
 	// sanity check minimal node pointing to a child node
 	store(
 		bcat(b(0x80+2), // array(2)
 			bcat(b(0x40+1), b(0x01)), // bytes(1) "\x01" (bitmap)
 			bcat(b(0x80+1), // array(1)
-				bcat(b(0xa0+1), // map(1)
-					bcat(b(0x60+1), b(0x30)), // string(1) "0"
-					bcat(b(0xd8), b(0x2a), // tag(42)
-						b(0x58), b(0x27), // bytes(39)
-						cidBytes))))) // cid
+				bcat(b(0xd8), b(0x2a), // tag(42)
+					b(0x58), b(0x27), // bytes(39)
+					cidBytes)))) // cid
 	load()
 
 	// node pointing to a non-dag-cbor node
@@ -1298,11 +1221,9 @@ func TestMalformedHamt(t *testing.T) {
 		bcat(b(0x80+2), // array(2)
 			bcat(b(0x40+1), b(0x01)), // bytes(1) "\x01" (bitmap)
 			bcat(b(0x80+1), // array(1)
-				bcat(b(0xa0+1), // map(1)
-					bcat(b(0x60+1), b(0x30)), // string(1) "0"
-					bcat(b(0xd8), b(0x2a), // tag(42)
-						b(0x58), b(0x27), // bytes(39)
-						badCidBytes))))) // cid
+				bcat(b(0xd8), b(0x2a), // tag(42)
+					b(0x58), b(0x27), // bytes(39)
+					badCidBytes)))) // cid
 	n, err = LoadNode(ctx, cs, bcid, UseTreeBitWidth(8), UseHashFunction(identityHash))
 	if err != ErrMalformedHamt || n != nil {
 		t.Fatal("Should have returned ErrMalformedHamt for bad child link codec")
@@ -1382,14 +1303,12 @@ func TestMalformedHamt(t *testing.T) {
 		bcat(b(0x80+2), // array(2)
 			bcat(b(0x40+1), b(0x01)), // bytes(1) "\x01" (bitmap)
 			bcat(b(0x80+1), // array(1)
-				bcat(b(0xa0+1), // map(1)
-					bcat(b(0x60+1), b(0x30)), // string(1) "0"
-					bcat(b(0xd8), b(0x2a), // tag(42)
-						b(0x58), b(0x27), // bytes(39)
-						ccidBytes))))) // cid
+				bcat(b(0xd8), b(0x2a), // tag(42)
+					b(0x58), b(0x27), // bytes(39)
+					ccidBytes)))) // cid
 
-	vg, err := load().FindRaw(ctx, string([]byte{0x00, 0x01}))
-	// without validation of the child block, this would return an ErrNotFound
+	_, vg, err := load().FindRaw(ctx, string([]byte{0x00, 0x01}))
+	// without validation of the child block, this would return not found
 	if err != ErrMalformedHamt || vg != nil {
 		t.Fatal("Should have returned ErrMalformedHamt for its empty child node")
 	}
@@ -1400,8 +1319,8 @@ func TestMalformedHamt(t *testing.T) {
 			bcat(b(0x40+1), b(0x01)), // bytes(1) "\x01" (bitmap)
 			bcat(b(0x80+1), // array(1)
 				bucketCbor(kv{0x00, 0x01}))))
-	vg, err = load().FindRaw(ctx, string([]byte{0x00, 0x01}))
-	// without validation of the child block, this would return an ErrNotFound
+	_, vg, err = load().FindRaw(ctx, string([]byte{0x00, 0x01}))
+	// without validation of the child block, this would return not found
 	if err != ErrMalformedHamt || vg != nil {
 		t.Fatal("Should have returned ErrMalformedHamt for its too-small child node")
 	}
@@ -1413,8 +1332,8 @@ func TestMalformedHamt(t *testing.T) {
 				bucketCbor(kv{0x00, 0x01}),
 				bucketCbor(kv{0x01, 0x01}),
 				bucketCbor(kv{0x02, 0x01}))))
-	vg, err = load().FindRaw(ctx, string([]byte{0x00, 0x01}))
-	// without validation of the child block, this would return an ErrNotFound
+	_, vg, err = load().FindRaw(ctx, string([]byte{0x00, 0x01}))
+	// without validation of the child block, this would return not found
 	if err != ErrMalformedHamt || vg != nil {
 		t.Fatal("Should have returned ErrMalformedHamt for its too-small child node")
 	}
@@ -1425,20 +1344,16 @@ func TestMalformedHamt(t *testing.T) {
 		bcat(b(0x80+2), // array(2)
 			bcat(b(0x40+1), b(0x03)), // bytes(1) "\x03" (bitmap)
 			bcat(b(0x80+2), // array(2)
-				bcat(b(0xa0+1), // map(1)
-					bcat(b(0x60+1), b(0x31)), // string(1) "1"
-					bcat(b(0x80+1), // array(1)
-						bcat(b(0x80+2), // array(2)
-							bcat(b(0x40+2), []byte{0x00, 0x01}), // bytes(2) "\x0001"
-							bcat(b(0x40+1), b(0xff))))),         // bytes(1) "\xff"
-				bcat(b(0xa0+1), // map(1)
-					bcat(b(0x60+1), b(0x30)), // string(1) "0"
-					bcat(b(0xd8), b(0x2a), // tag(42)
-						b(0x58), b(0x27), // bytes(39)
-						ccidBytes))))) // cid
+				bcat(b(0x80+1), // array(1)
+					bcat(b(0x80+2), // array(2)
+						bcat(b(0x40+2), []byte{0x00, 0x01}), // bytes(2) "\x0001"
+						bcat(b(0x40+1), b(0xff)))),          // bytes(1) "\xff"
+				bcat(b(0xd8), b(0x2a), // tag(42)
+					b(0x58), b(0x27), // bytes(39)
+					ccidBytes)))) // cid
 
-	vg, err = load().FindRaw(ctx, string([]byte{0x00, 0x01}))
-	// without validation of the child block, this would return an ErrNotFound
+	_, vg, err = load().FindRaw(ctx, string([]byte{0x00, 0x01}))
+	// without validation of the child block, this would return not found
 	if err != nil && bytes.Compare(vg, []byte{0x40 + 2, 0x00, 0x01}) != 0 {
 		t.Fatal("Should have returned found entry")
 	}
@@ -1472,7 +1387,7 @@ func TestCleanChildOrdering(t *testing.T) {
 		n := binary.PutUvarint(buf, i)
 		return string(buf[:n])
 	}
-	dummyValue := []byte{0xaa, 0xbb, 0xcc, 0xdd}
+	dummyValue := cbg.CborInt(42)
 
 	ctx := context.Background()
 	trackingBs := newMockBlocks()
@@ -1485,10 +1400,11 @@ func TestCleanChildOrdering(t *testing.T) {
 		}),
 	}
 
-	h := NewNode(cs, hamtOptions...)
+	h, err := NewNode(cs, hamtOptions...)
+	require.NoError(t, err)
 
 	for i := uint64(100); i < uint64(195); i++ {
-		err := h.Set(ctx, makeKey(i), dummyValue)
+		err := h.Set(ctx, makeKey(i), &dummyValue)
 		require.NoError(t, err)
 	}
 
@@ -1502,10 +1418,12 @@ func TestCleanChildOrdering(t *testing.T) {
 	require.NoError(t, err)
 
 	// Delete key 104 so child indexed at 20 has four pointers
-	err = h.Delete(ctx, makeKey(104))
+	found, err := h.Delete(ctx, makeKey(104))
 	assert.NoError(t, err)
-	err = h.Delete(ctx, makeKey(108))
+	assert.True(t, found)
+	found, err = h.Delete(ctx, makeKey(108))
 	assert.NoError(t, err)
+	assert.True(t, found)
 	err = h.Flush(ctx)
 	assert.NoError(t, err)
 	root, err = cs.Put(ctx, h)
@@ -1515,6 +1433,128 @@ func TestCleanChildOrdering(t *testing.T) {
 	h, err = LoadNode(ctx, cs, root, hamtOptions...)
 	assert.NoError(t, err)
 
-	assert.Equal(t, "bafy2bzacec6ro3q36okye22evifu6h7kwdkjlb4keq6ogpfqivka6myk6wkjo", root.String())
-	assert.Equal(t, bsStats{r: 9, w: 17, br: 2327, bw: 2845}, trackingBs.stats)
+	assert.Equal(t, "bafy2bzacedlyeuub3mo4aweqs7zyxrbldsq2u4a2taswubudgupglu2j4eru6", root.String())
+	assert.Equal(t, bsStats{r: 3, w: 11, br: 1449, bw: 1751}, trackingBs.stats)
+}
+
+func TestPutOrderIndependent(t *testing.T) {
+	makeKey := func(i uint64) string {
+		buf := make([]byte, 10)
+		n := binary.PutUvarint(buf, i)
+		return string(buf[:n])
+	}
+	dummyValue := cbg.CborInt(42)
+
+	ctx := context.Background()
+	cs := cbor.NewCborStore(newMockBlocks())
+	hamtOptions := []Option{
+		UseTreeBitWidth(5),
+		UseHashFunction(func(input []byte) []byte {
+			res := sha256.Sum256(input)
+			return res[:]
+		}),
+	}
+
+	h, err := NewNode(cs, hamtOptions...)
+	require.NoError(t, err)
+
+	nKeys := 32 * 32 * 2
+
+	for i := uint64(1); i < uint64(nKeys); i++ {
+		err := h.Set(ctx, makeKey(i), &dummyValue)
+		require.NoError(t, err)
+	}
+
+	// Shouldn't matter but repeating original case exactly
+	require.NoError(t, h.Flush(ctx))
+	c, err := cs.Put(ctx, h)
+	require.NoError(t, err)
+
+	vals := make([]int, 100)
+
+	for i := range vals {
+		vals[i] = rand.Intn(nKeys)
+	}
+
+	newDummyValue := cbg.CborInt(43)
+
+	res := map[cid.Cid]struct{}{}
+	for i := 0; i < 20; i++ {
+		h, err = LoadNode(ctx, cs, c, hamtOptions...)
+		require.NoError(t, err)
+		rand.Shuffle(len(vals), func(i, j int) {
+			vals[i], vals[j] = vals[j], vals[i]
+		})
+
+		for _, k := range vals {
+			h.Set(ctx, makeKey(uint64(k)), &newDummyValue)
+		}
+
+		require.NoError(t, h.Flush(ctx))
+		c, err := cs.Put(ctx, h)
+		require.NoError(t, err)
+		res[c] = struct{}{}
+	}
+
+	require.Len(t, res, 1)
+}
+
+func TestDeleteOrderIndependent(t *testing.T) {
+	makeKey := func(i uint64) string {
+		buf := make([]byte, 10)
+		n := binary.PutUvarint(buf, i)
+		return string(buf[:n])
+	}
+	dummyValue := cbg.CborInt(42)
+
+	ctx := context.Background()
+	cs := cbor.NewCborStore(newMockBlocks())
+	hamtOptions := []Option{
+		UseTreeBitWidth(5),
+		UseHashFunction(func(input []byte) []byte {
+			res := sha256.Sum256(input)
+			return res[:]
+		}),
+	}
+
+	h, err := NewNode(cs, hamtOptions...)
+	require.NoError(t, err)
+
+	nKeys := 32 * 32 * 2
+
+	for i := uint64(1); i < uint64(nKeys); i++ {
+		err := h.Set(ctx, makeKey(i), &dummyValue)
+		require.NoError(t, err)
+	}
+
+	// Shouldn't matter but repeating original case exactly
+	require.NoError(t, h.Flush(ctx))
+	c, err := cs.Put(ctx, h)
+	require.NoError(t, err)
+
+	vals := make([]int, 100)
+
+	for i := range vals {
+		vals[i] = rand.Intn(nKeys)
+	}
+
+	res := map[cid.Cid]struct{}{}
+	for i := 0; i < 20; i++ {
+		h, err = LoadNode(ctx, cs, c, hamtOptions...)
+		require.NoError(t, err)
+		rand.Shuffle(len(vals), func(i, j int) {
+			vals[i], vals[j] = vals[j], vals[i]
+		})
+
+		for _, k := range vals {
+			h.Delete(ctx, makeKey(uint64(k)))
+		}
+
+		require.NoError(t, h.Flush(ctx))
+		c, err := cs.Put(ctx, h)
+		require.NoError(t, err)
+		res[c] = struct{}{}
+	}
+
+	require.Len(t, res, 1)
 }
