@@ -1,9 +1,8 @@
 package hamt
 
 import (
+	"crypto/sha256"
 	"fmt"
-
-	"github.com/spaolacci/murmur3"
 )
 
 // hashBits is a helper that allows the reading of the 'next n bits' of a
@@ -63,7 +62,6 @@ func (hb *hashBits) next(i int) int {
 }
 
 func defaultHashFunction(val []byte) []byte {
-	h := murmur3.New64()
-	h.Write(val)
-	return h.Sum(nil)
+	res := sha256.Sum256(val)
+	return res[:]
 }

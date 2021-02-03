@@ -23,35 +23,38 @@ import (
 
 type mockBlocks struct {
 	data  map[cid.Cid]block.Block
-	stats blockstoreStats
+	stats bsStats
 }
 
 func newMockBlocks() *mockBlocks {
-	return &mockBlocks{make(map[cid.Cid]block.Block), blockstoreStats{}}
+	return &mockBlocks{make(map[cid.Cid]block.Block), bsStats{}}
 }
 
 func (mb *mockBlocks) Get(c cid.Cid) (block.Block, error) {
-	mb.stats.evtcntGet++
+	mb.stats.r++
 	d, ok := mb.data[c]
 	if ok {
+		mb.stats.br += len(d.RawData())
 		return d, nil
 	}
 	return nil, fmt.Errorf("Not Found")
 }
 
 func (mb *mockBlocks) Put(b block.Block) error {
-	mb.stats.evtcntPut++
-	if _, exists := mb.data[b.Cid()]; exists {
-		mb.stats.evtcntPutDup++
-	}
+	mb.stats.w++
+	mb.stats.bw += len(b.RawData())
+	// if _, exists := mb.data[b.Cid()]; exists {
+	// 	mb.stats.evtcntPutDup++
+	// }
 	mb.data[b.Cid()] = b
 	return nil
 }
 
-type blockstoreStats struct {
-	evtcntGet    int
-	evtcntPut    int
-	evtcntPutDup int
+type bsStats struct {
+	r  int
+	w  int
+	br int
+	bw int
 }
 
 func (mb *mockBlocks) totalBlockSizes() int {
@@ -139,6 +142,11 @@ var identityHash = func(k []byte) []byte {
 	return res
 }
 
+var shaHash = func(k []byte) []byte {
+	out := sha256.Sum256(k)
+	return out[:]
+}
+
 var shortIdentityHash = func(k []byte) []byte {
 	res := make([]byte, 16)
 	copy(res, k)
@@ -146,17 +154,17 @@ var shortIdentityHash = func(k []byte) []byte {
 }
 
 func TestCanonicalStructure(t *testing.T) {
-	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, UseHashFunction(identityHash))
-	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"})
+	// addAndRemoveKeys(t, []string{"K"}, []string{"B"}, "bafy2bzacecdihronbg6gyhpzhuiax3thpv5gxpunwczuanqym3r7wih3bkmb4", bsStats{r: 2, w: 4, br: 42, bw: 84}, UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "bafy2bzacedrktzj4o7iumailmdzl5gz3uqr4bw2o72qg4zv5q7qhezy4r32bc", bsStats{r: 7, w: 10, br: 388, bw: 561}, UseHashFunction(identityHash))
 }
 
 func TestCanonicalStructureAlternateBitWidth(t *testing.T) {
-	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, UseTreeBitWidth(7), UseHashFunction(identityHash))
-	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, UseTreeBitWidth(7), UseHashFunction(identityHash))
-	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, UseTreeBitWidth(6), UseHashFunction(identityHash))
-	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, UseTreeBitWidth(6), UseHashFunction(identityHash))
-	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, UseTreeBitWidth(5), UseHashFunction(identityHash))
-	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, UseTreeBitWidth(5), UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, "bafy2bzacedckymwjxmg35sllfegwrmnr7rxb3x7dh6muec2li2qhqjk5tf63q", bsStats{r: 2, w: 4, br: 32, bw: 64}, UseTreeBitWidth(7), UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "bafy2bzaceckigpba3kck23qyuyb2i6vbiprtsmlr2rlyn3o4lmmcvzsh3l6wi", bsStats{r: 8, w: 11, br: 419, bw: 580}, UseTreeBitWidth(7), UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, "bafy2bzacec2f6scvfmnyal5pzn43if6e2kls5jbm2jdab2xzuditctd5i3bbi", bsStats{r: 2, w: 4, br: 28, bw: 56}, UseTreeBitWidth(6), UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "bafy2bzacedeeqff3p7n3ogqxvqslb2yrbi4ojz44sp6mvjwyp6u6lktxdo2fg", bsStats{r: 8, w: 11, br: 385, bw: 538}, UseTreeBitWidth(6), UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K"}, []string{"B"}, "bafy2bzacecnabvcxw7k5hgfcex5ig4jf3nabuxvl35edgnjk5ven2kg4n3ffm", bsStats{r: 2, w: 4, br: 26, bw: 52}, UseTreeBitWidth(5), UseHashFunction(identityHash))
+	addAndRemoveKeys(t, []string{"K0", "K1", "KAA1", "KAA2", "KAA3"}, []string{"KAA4"}, "bafy2bzacedc7hh2tyz66m7n7ricyw2m7whsgoplyux3kbxczla7zuf25wi2og", bsStats{r: 9, w: 12, br: 420, bw: 566}, UseTreeBitWidth(5), UseHashFunction(identityHash))
 }
 
 func TestOverflow(t *testing.T) {
@@ -358,15 +366,16 @@ func TestFillAndCollapse(t *testing.T) {
 	}
 }
 
-func addAndRemoveKeys(t *testing.T, keys []string, extraKeys []string, options ...Option) {
+func addAndRemoveKeys(t *testing.T, keys []string, extraKeys []string, cid string, stats bsStats, options ...Option) {
 	ctx := context.Background()
-	vals := make(map[string][]byte)
+	vals := make(map[string]int)
 	for i := 0; i < len(keys); i++ {
 		s := keys[i]
-		vals[s] = randValue()
+		vals[s] = i
 	}
 
-	cs := cbor.NewCborStore(newMockBlocks())
+	trackingBs := newMockBlocks()
+	cs := cbor.NewCborStore(trackingBs)
 	begn := NewNode(cs, options...)
 	for _, k := range keys {
 		if err := begn.Set(ctx, k, vals[k]); err != nil {
@@ -374,16 +383,19 @@ func addAndRemoveKeys(t *testing.T, keys []string, extraKeys []string, options .
 		}
 	}
 
-	fmt.Println("start flush")
-	bef := time.Now()
+	fmt.Println(trackingBs.stats)
+
+	// fmt.Println("start flush")
+	// bef := time.Now()
 	if err := begn.Flush(ctx); err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("flush took: ", time.Since(bef))
+	// fmt.Println("flush took: ", time.Since(bef))
 	c, err := cs.Put(ctx, begn)
 	if err != nil {
 		t.Fatal(err)
 	}
+	fmt.Println(trackingBs.stats)
 
 	var n Node
 	if err := cs.Get(ctx, c, &n); err != nil {
@@ -392,22 +404,23 @@ func addAndRemoveKeys(t *testing.T, keys []string, extraKeys []string, options .
 	n.store = cs
 	n.hash = begn.hash
 	n.bitWidth = begn.bitWidth
+
 	for k, v := range vals {
-		var out []byte
+		var out int
 		err := n.Find(ctx, k, &out)
 		if err != nil {
 			t.Fatalf("should have found the thing (err: %s)", err)
 		}
-		if !bytes.Equal(out, v) {
+		if out != v {
 			t.Fatalf("got wrong value after value change: %x != %x", out, v)
 		}
 	}
 
-	printHamt(begn)
+	// printHamt(begn)
 
 	// create second hamt by adding and deleting the extra keys
 	for i := 0; i < len(extraKeys); i++ {
-		begn.Set(ctx, extraKeys[i], randValue())
+		begn.Set(ctx, extraKeys[i], i)
 	}
 	for i := 0; i < len(extraKeys); i++ {
 		if err := begn.Delete(ctx, extraKeys[i]); err != nil {
@@ -423,6 +436,8 @@ func addAndRemoveKeys(t *testing.T, keys []string, extraKeys []string, options .
 		t.Fatal(err)
 	}
 
+	fmt.Println(trackingBs.stats)
+
 	var n2 Node
 	if err := cs.Get(ctx, c2, &n2); err != nil {
 		t.Fatal(err)
@@ -433,37 +448,40 @@ func addAndRemoveKeys(t *testing.T, keys []string, extraKeys []string, options .
 	if !nodesEqual(t, cs, &n, &n2) {
 		t.Fatal("nodes should be equal")
 	}
+
+	assert.Equal(t, cid, c2.String())
+	assert.Equal(t, stats, trackingBs.stats)
 }
 
 func printHamt(hamt *Node) {
-	ctx := context.Background()
+	// ctx := context.Background()
 
-	var printNode func(n *Node, depth int)
+	// var printNode func(n *Node, depth int)
 
-	printNode = func(n *Node, depth int) {
-		c, err := n.store.Put(ctx, n)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Printf("%s‣ %v:\n", strings.Repeat("  ", depth), c)
-		for _, p := range n.Pointers {
-			if p.isShard() {
-				child, err := p.loadChild(ctx, n.store, n.bitWidth, n.hash)
-				if err != nil {
-					panic(err)
-				}
-				printNode(child, depth+1)
-			} else {
-				var keys []string
-				for _, pt := range p.KVs {
-					keys = append(keys, string(pt.Key))
-				}
-				fmt.Printf("%s⇶ [ %s ]\n", strings.Repeat("  ", depth+1), strings.Join(keys, ", "))
-			}
-		}
-	}
+	// printNode = func(n *Node, depth int) {
+	// 	c, err := n.store.Put(ctx, n)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	fmt.Printf("%s‣ %v:\n", strings.Repeat("  ", depth), c)
+	// 	for _, p := range n.Pointers {
+	// 		if p.isShard() {
+	// 			child, err := p.loadChild(ctx, n.store, n.bitWidth, n.hash)
+	// 			if err != nil {
+	// 				panic(err)
+	// 			}
+	// 			printNode(child, depth+1)
+	// 		} else {
+	// 			var keys []string
+	// 			for _, pt := range p.KVs {
+	// 				keys = append(keys, string(pt.Key))
+	// 			}
+	// 			fmt.Printf("%s⇶ [ %s ]\n", strings.Repeat("  ", depth+1), strings.Join(keys, ", "))
+	// 		}
+	// 	}
+	// }
 
-	printNode(hamt, 0)
+	// printNode(hamt, 0)
 }
 
 func dotGraphRec(n *Node, name *int) {
@@ -581,18 +599,18 @@ func testBasic(t *testing.T, options ...Option) {
 
 func TestDelete(t *testing.T) {
 	ctx := context.Background()
-	cs := cbor.NewCborStore(newMockBlocks())
-	begn := NewNode(cs)
+	trackingBs := newMockBlocks()
+	cs := cbor.NewCborStore(trackingBs)
+	begn := NewNode(cs, UseHashFunction(shaHash))
 
-	val := []byte("cat dog bear")
-	if err := begn.Set(ctx, "foo", val); err != nil {
+	if err := begn.Set(ctx, "foo", []byte("cat dog bear")); err != nil {
 		t.Fatal(err)
 	}
-
-	for i := 0; i < 10; i++ {
-		if err := begn.Set(ctx, randString(), randValue()); err != nil {
-			t.Fatal(err)
-		}
+	if err := begn.Set(ctx, "bar", []byte("cat dog")); err != nil {
+		t.Fatal(err)
+	}
+	if err := begn.Set(ctx, "baz", []byte("cat")); err != nil {
+		t.Fatal(err)
 	}
 
 	if err := begn.Flush(ctx); err != nil {
@@ -602,6 +620,8 @@ func TestDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	assert.Equal(t, "bafy2bzacebhjoag2qmyibmvvzq372pg2evlkchovqdksmna4hm7py5itnrlhg", c.String())
 
 	n, err := LoadNode(ctx, cs, c)
 	if err != nil {
@@ -616,6 +636,186 @@ func TestDelete(t *testing.T) {
 	if err := n.Find(ctx, "foo", &out); err == nil {
 		t.Fatal("shouldnt have found object")
 	}
+
+	if err := n.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c2, err := cs.Put(ctx, n)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, "bafy2bzaceczehhtzfhg4ijrkv2omajt5ygwbd6srqhhtkxgd2hjttpihxs5ky", c2.String())
+	assert.Equal(t, bsStats{r: 1, w: 2, br: 88, bw: 154}, trackingBs.stats)
+}
+func TestDeleteCase(t *testing.T) {
+	ctx := context.Background()
+	trackingBs := newMockBlocks()
+	cs := cbor.NewCborStore(trackingBs)
+	begn := NewNode(cs, UseHashFunction(shaHash))
+
+	if err := begn.Set(ctx, string([]byte{0}), []byte("Test data")); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := begn.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c, err := cs.Put(ctx, begn)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, "bafy2bzacecngbbdw3ut45b3tnsan3fgxwlsnit25unejfmh4ihlhkxr2hutuo", c.String())
+
+	n, err := LoadNode(ctx, cs, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := n.Delete(ctx, string([]byte{0})); err != nil {
+		t.Fatal(err)
+	}
+
+	var out []byte
+	if err := n.Find(ctx, string([]byte{0}), &out); err == nil {
+		t.Fatal("shouldnt have found object")
+	}
+
+	if err := n.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c2, err := cs.Put(ctx, n)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, "bafy2bzaceamp42wmmgr2g2ymg46euououzfyck7szknvfacqscohrvaikwfay", c2.String())
+	assert.Equal(t, bsStats{r:1, w:2, br:34, bw:37}, trackingBs.stats)
+}
+
+func TestSetDeleteMany(t *testing.T) {
+	ctx := context.Background()
+	trackingBs := newMockBlocks()
+	cs := cbor.NewCborStore(trackingBs)
+	n := NewNode(cs, UseTreeBitWidth(5), UseHashFunction(shaHash))
+
+	for i := 0; i < 200; i++ {
+		if err := n.Set(ctx, strconv.Itoa(i), i); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := n.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c, err := cs.Put(ctx, n)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "bafy2bzaceaneyzybb37pn4rtg2mvn2qxb43rhgmqoojgtz7avdfjw2lhz4dge", c.String())
+
+	for i := 200; i < 400; i++ {
+		if err := n.Set(ctx, strconv.Itoa(i), i); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := n.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c, err = cs.Put(ctx, n)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "bafy2bzaceaqmub32nf33s3joo6x2l3schxreuow7jkla7a27l7qcrsb2elzay", c.String())
+
+	for i := 200; i < 400; i++ {
+		if err := n.Delete(ctx, strconv.Itoa(i)); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := n.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c, err = cs.Put(ctx, n)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "bafy2bzaceaneyzybb37pn4rtg2mvn2qxb43rhgmqoojgtz7avdfjw2lhz4dge", c.String())
+	assert.Equal(t, bsStats{r: 87, w: 119, br: 7671, bw: 14042}, trackingBs.stats)
+}
+	if err := n.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c, err = cs.Put(ctx, n)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "bafy2bzaceaneyzybb37pn4rtg2mvn2qxb43rhgmqoojgtz7avdfjw2lhz4dge", c.String())
+	assert.Equal(t, bsStats{r: 87, w: 119, br: 7671, bw: 14042}, trackingBs.stats)
+}
+func TestForEach(t *testing.T) {
+	ctx := context.Background()
+	trackingBs := newMockBlocks()
+	cs := cbor.NewCborStore(trackingBs)
+	n := NewNode(cs, UseTreeBitWidth(5), UseHashFunction(shaHash))
+
+	for i := 0; i < 200; i++ {
+		if err := n.Set(ctx, strconv.Itoa(i), i); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// Dirty cached nodes
+	count := 0
+	err := n.ForEach(ctx, func(k string, v interface{}) error {
+		count++
+		return nil
+	})
+	assert.Equal(t, count, 200)
+
+	if err := n.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c, err := cs.Put(ctx, n)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "bafy2bzaceaneyzybb37pn4rtg2mvn2qxb43rhgmqoojgtz7avdfjw2lhz4dge", c.String())
+
+	n, err = LoadNode(ctx, cs, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Run with no cache
+	count = 0
+	err = n.ForEach(ctx, func(k string, v interface{}) error {
+		count++
+		return nil
+	})
+	assert.Equal(t, count, 200)
+
+	// Cached nodes
+	count = 0
+	err = n.ForEach(ctx, func(k string, v interface{}) error {
+		count++
+		return nil
+	})
+	assert.Equal(t, count, 200)
+
+	if err := n.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	c, err = cs.Put(ctx, n)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "bafy2bzaceaneyzybb37pn4rtg2mvn2qxb43rhgmqoojgtz7avdfjw2lhz4dge", c.String())
+
+	assert.Equal(t, bsStats{r: 59, w: 89, br: 4841, bw: 8351}, trackingBs.stats)
 }
 
 func TestSetGet(t *testing.T) {
@@ -743,7 +943,8 @@ func nodesEqual(t *testing.T, store cbor.IpldStore, n1, n2 *Node) bool {
 
 func TestReloadEmpty(t *testing.T) {
 	ctx := context.Background()
-	cs := cbor.NewCborStore(newMockBlocks())
+	trackingBs := newMockBlocks()
+	cs := cbor.NewCborStore(trackingBs)
 
 	n := NewNode(cs)
 	c, err := cs.Put(ctx, n)
@@ -751,14 +952,17 @@ func TestReloadEmpty(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	on, err := LoadNode(ctx, cs, c)
+	_, err = LoadNode(ctx, cs, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = cs.Put(ctx, n)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := on.Set(ctx, "foo", "bar"); err != nil {
-		t.Fatal(err)
-	}
+	assert.Equal(t, "bafy2bzaceamp42wmmgr2g2ymg46euououzfyck7szknvfacqscohrvaikwfay", c.String())
+	assert.Equal(t, bsStats{r: 1, w: 2, br: 3, bw: 6}, trackingBs.stats)
 }
 
 func TestCopy(t *testing.T) {
@@ -1271,7 +1475,8 @@ func TestCleanChildOrdering(t *testing.T) {
 	dummyValue := []byte{0xaa, 0xbb, 0xcc, 0xdd}
 
 	ctx := context.Background()
-	cs := cbor.NewCborStore(newMockBlocks())
+	trackingBs := newMockBlocks()
+	cs := cbor.NewCborStore(trackingBs)
 	hamtOptions := []Option{
 		UseTreeBitWidth(5),
 		UseHashFunction(func(input []byte) []byte {
@@ -1291,6 +1496,8 @@ func TestCleanChildOrdering(t *testing.T) {
 	require.NoError(t, h.Flush(ctx))
 	root, err := cs.Put(ctx, h)
 	require.NoError(t, err)
+	// assert.Equal(t, "bafy2bzaced2mfx4zquihmrbqei2ghtbsf7bvupjzaiwkkgfmvpfrbud25gfli", root.String())
+
 	h, err = LoadNode(ctx, cs, root, hamtOptions...)
 	require.NoError(t, err)
 
@@ -1307,4 +1514,7 @@ func TestCleanChildOrdering(t *testing.T) {
 	require.NoError(t, err)
 	h, err = LoadNode(ctx, cs, root, hamtOptions...)
 	assert.NoError(t, err)
+
+	assert.Equal(t, "bafy2bzacec6ro3q36okye22evifu6h7kwdkjlb4keq6ogpfqivka6myk6wkjo", root.String())
+	assert.Equal(t, bsStats{r: 9, w: 17, br: 2327, bw: 2845}, trackingBs.stats)
 }
